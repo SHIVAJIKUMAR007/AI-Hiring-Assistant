@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { screenResume } from '../../services/geminiService';
 import { type RoleAnalysis, type ResumeScreeningResult, type ScreenedResume } from '../../types';
@@ -34,6 +34,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
   const [resumes, setResumes] = useState<ScreenedResume[]>([]);
   const [isScreening, setIsScreening] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: 'matchScore', direction: 'ascending' | 'descending' }>({ key: 'matchScore', direction: 'descending' });
+  const addFileInputRef = useRef<HTMLInputElement>(null);
 
   const extractTextFromPDF = async (file: File): Promise<string> => {
     const arrayBuffer = await file.arrayBuffer();
@@ -95,6 +96,20 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
     setResumes([]);
   }
 
+  const handleAddMoreClick = () => {
+    addFileInputRef.current?.click();
+  };
+
+  const handleAddFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      handleFilesSelected(Array.from(files));
+    }
+    if (e.target) {
+        e.target.value = '';
+    }
+  };
+
   const sortedResumes = useMemo(() => {
     return [...resumes].sort((a, b) => {
       if (!a.result || !b.result) return 0;
@@ -128,13 +143,23 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
         </p>
       </div>
 
+      <input
+        type="file"
+        multiple
+        accept="application/pdf"
+        ref={addFileInputRef}
+        onChange={handleAddFiles}
+        className="hidden"
+      />
+
       {resumes.length === 0 ? (
         <FileUpload onFilesSelected={handleFilesSelected} />
       ) : (
         <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-2 justify-between items-center">
                 <p className="text-sm text-gray-600">{resumes.length} resume(s) uploaded.</p>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap justify-end">
+                    <Button onClick={handleAddMoreClick} variant='secondary'>Add Resumes</Button>
                     <Button onClick={handleClear} variant='secondary'>Clear All</Button>
                     <Button onClick={handleScreenResumes} disabled={isScreening || readyToScreenCount === 0}>
                         {isScreening ? <><Spinner />Screening...</> : `Screen ${readyToScreenCount} Resumes`}
