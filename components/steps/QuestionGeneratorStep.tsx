@@ -39,6 +39,7 @@ export const QuestionGeneratorStep: React.FC<QuestionGeneratorStepProps> = ({ ro
         setIsLoading(true);
         const result = await generateInterviewQuestions(roleAnalysis);
         setQuestions(result);
+        onQuestionsGenerated(result);
       } catch (e) {
         setError('Failed to generate interview questions. Please try again.');
         console.error(e);
@@ -88,7 +89,7 @@ export const QuestionGeneratorStep: React.FC<QuestionGeneratorStepProps> = ({ ro
 
       <div className="flex justify-between mt-4">
         <Button onClick={onBack} variant="secondary">Back</Button>
-        <Button onClick={() => questions && onQuestionsGenerated(questions)} disabled={isLoading || !!error || !questions}>
+        <Button onClick={() => { /* Proceeed is now handled by App state */ }} disabled={true} className="opacity-0 pointer-events-none">
           Proceed to Resume Screening
         </Button>
       </div>

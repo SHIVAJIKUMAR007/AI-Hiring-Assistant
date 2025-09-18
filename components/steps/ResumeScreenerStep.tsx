@@ -1,15 +1,19 @@
+
 import React, { useState, useCallback, useMemo, useRef } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
 import { screenResume } from '../../services/geminiService';
-import { type RoleAnalysis, type ResumeScreeningResult, type ScreenedResume } from '../../types';
+import { type Analysis, type RoleAnalysis, type ResumeScreeningResult, type ScreenedResume } from '../../types';
+import { fileToBase64, base64ToBlobUrl, base64ToArrayBuffer } from '../../utils/fileUtils';
 import { Button } from '../common/Button';
 import { Spinner } from '../common/Spinner';
 import { FileUpload } from '../common/FileUpload';
+import { ExportButton } from '../common/ExportButton';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://aistudiocdn.com/pdfjs-dist@^4.5.136/build/pdf.worker.mjs`;
 
 interface ResumeScreenerStepProps {
-  roleAnalysis: RoleAnalysis;
+  analysis: Analysis;
+  onUpdateAnalysis: (analysis: Analysis) => void;
   onBack: () => void;
   onStartOver: () => void;
 }
@@ -36,15 +40,19 @@ const SkillChip: React.FC<{ skill: string }> = ({ skill }) => (
     </span>
 );
 
-export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnalysis, onBack, onStartOver }) => {
-  const [resumes, setResumes] = useState<ScreenedResume[]>([]);
+export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ analysis, onUpdateAnalysis, onBack, onStartOver }) => {
   const [isScreening, setIsScreening] = useState(false);
   const [sortConfig, setSortConfig] = useState<{ key: 'matchScore', direction: 'ascending' | 'descending' }>({ key: 'matchScore', direction: 'descending' });
   const addFileInputRef = useRef<HTMLInputElement>(null);
+  
+  const setResumes = (updater: (prev: ScreenedResume[]) => ScreenedResume[]) => {
+    const newResumes = updater(analysis.screenedResumes);
+    onUpdateAnalysis({ ...analysis, screenedResumes: newResumes });
+  };
 
-  const extractTextFromPDF = async (file: File): Promise<string> => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+  const extractTextFromPDF = async (base64Content: string): Promise<string> => {
+    const pdfData = base64ToArrayBuffer(base64Content);
+    const pdf = await pdfjsLib.getDocument(pdfData).promise;
     let textContent = '';
     for (let i = 1; i <= pdf.numPages; i++) {
       const page = await pdf.getPage(i);
@@ -55,16 +63,21 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
   };
 
   const handleFilesSelected = useCallback(async (selectedFiles: File[]) => {
-    const newResumes: ScreenedResume[] = Array.from(selectedFiles).map(file => ({
-      id: crypto.randomUUID(),
-      file,
-      status: 'parsing',
-    }));
+    const newResumePromises = Array.from(selectedFiles).map(async (file) => {
+      const content = await fileToBase64(file);
+      return {
+        id: crypto.randomUUID(),
+        file: { name: file.name, type: file.type, content },
+        status: 'parsing',
+      } as ScreenedResume;
+    });
+    
+    const newResumes = await Promise.all(newResumePromises);
     setResumes(prev => [...prev, ...newResumes]);
 
     for (const resume of newResumes) {
       try {
-        const text = await extractTextFromPDF(resume.file);
+        const text = await extractTextFromPDF(resume.file.content);
         setResumes(prev => prev.map(r => r.id === resume.id ? { ...r, text, status: 'ready' } : r));
       } catch (error) {
         console.error('Failed to parse PDF:', error);
@@ -77,11 +90,11 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
     setIsScreening(true);
     setResumes(prev => prev.map(r => r.status === 'ready' ? { ...r, status: 'screening' } : r));
     
-    const screeningPromises = resumes
+    const screeningPromises = analysis.screenedResumes
       .filter(r => r.status === 'ready' && r.text)
       .map(async (resume) => {
         try {
-          const result = await screenResume(roleAnalysis, resume.text!);
+          const result = await screenResume(analysis.roleAnalysis!, resume.text!);
           setResumes(prev => prev.map(r => r.id === resume.id ? { ...r, result, status: 'completed' } : r));
         } catch (error) {
           console.error('Failed to screen resume:', error);
@@ -91,15 +104,15 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
     
     await Promise.all(screeningPromises);
     setIsScreening(false);
-  }, [resumes, roleAnalysis]);
+  }, [analysis]);
 
-  const handleViewPdf = (file: File) => {
-    const url = URL.createObjectURL(file);
+  const handleViewPdf = (file: ScreenedResume['file']) => {
+    const url = base64ToBlobUrl(file.content, file.type);
     window.open(url, '_blank');
   };
 
   const handleClear = () => {
-    setResumes([]);
+    setResumes(() => []);
   }
 
   const handleAddMoreClick = () => {
@@ -117,7 +130,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
   };
 
   const sortedResumes = useMemo(() => {
-    return [...resumes].sort((a, b) => {
+    return [...analysis.screenedResumes].sort((a, b) => {
       if (!a.result || !b.result) return 0;
       if (a.result[sortConfig.key] < b.result[sortConfig.key]) {
         return sortConfig.direction === 'ascending' ? -1 : 1;
@@ -127,7 +140,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
       }
       return 0;
     });
-  }, [resumes, sortConfig]);
+  }, [analysis.screenedResumes, sortConfig]);
 
   const requestSort = (key: 'matchScore') => {
     let direction: 'ascending' | 'descending' = 'descending';
@@ -137,8 +150,8 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
     setSortConfig({ key, direction });
   };
   
-  const readyToScreenCount = resumes.filter(r => r.status === 'ready').length;
-  const isAnythingDone = resumes.some(r => r.status === 'completed');
+  const readyToScreenCount = analysis.screenedResumes.filter(r => r.status === 'ready').length;
+  const isAnythingDone = analysis.screenedResumes.some(r => r.status === 'completed');
 
   return (
     <div className="flex flex-col gap-6">
@@ -158,13 +171,14 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
         className="hidden"
       />
 
-      {resumes.length === 0 ? (
+      {analysis.screenedResumes.length === 0 ? (
         <FileUpload onFilesSelected={handleFilesSelected} />
       ) : (
         <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-2 justify-between items-center">
-                <p className="text-sm text-gray-600 dark:text-gray-400">{resumes.length} resume(s) uploaded.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{analysis.screenedResumes.length} resume(s) uploaded.</p>
                 <div className="flex gap-2 flex-wrap justify-end">
+                    <ExportButton data={sortedResumes} disabled={!isAnythingDone} />
                     <Button onClick={handleAddMoreClick} variant='secondary'>Add Resumes</Button>
                     <Button onClick={handleClear} variant='secondary'>Clear All</Button>
                     <Button onClick={handleScreenResumes} disabled={isScreening || readyToScreenCount === 0}>
@@ -189,7 +203,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
                         {sortedResumes.map((resume, index) => (
                             <tr key={resume.id} className={index % 2 === 0 ? 'bg-white dark:bg-gray-800/50' : 'bg-gray-50/50 dark:bg-gray-800/20'}>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate sm:max-w-sm md:max-w-md">{resume.file.name}</div>
+                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate sm:max-w-xs md:max-w-sm" title={resume.file.name}>{resume.file.name}</div>
                                     <div className="text-xs text-gray-500 dark:text-gray-400">
                                         {resume.status === 'parsing' && 'Parsing...'}
                                         {resume.status === 'ready' && 'Ready to screen'}
@@ -207,14 +221,14 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
+                                        <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full w-full animate-pulse"></div>
                                     )}
                                 </td>
                                 <td className="px-6 py-4">
                                     {resume.result && (
                                         <div className="flex flex-wrap gap-1 max-w-sm">
                                             {resume.result.matchingSkills.length > 0 ? (
-                                                resume.result.matchingSkills.map(skill => <SkillChip key={skill} skill={skill} />)
+                                                resume.result.matchingSkills.slice(0, 8).map(skill => <SkillChip key={skill} skill={skill} />)
                                             ) : (
                                                 <span className="text-xs text-gray-500 dark:text-gray-400">No specific matches</span>
                                             )}
@@ -241,9 +255,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
       
       <div className="flex justify-between mt-4">
         <Button onClick={onBack} variant="secondary">Back</Button>
-        {isAnythingDone && (
-            <Button onClick={onStartOver}>Start New Analysis</Button>
-        )}
+        <Button onClick={onStartOver}>Back to Analyses</Button>
       </div>
     </div>
   );
