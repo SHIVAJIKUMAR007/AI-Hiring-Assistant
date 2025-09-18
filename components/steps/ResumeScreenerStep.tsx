@@ -30,6 +30,12 @@ const SortIcon: React.FC<{ direction?: 'ascending' | 'descending' }> = ({ direct
     return <svg className="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
 };
 
+const SkillChip: React.FC<{ skill: string }> = ({ skill }) => (
+    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+        {skill}
+    </span>
+);
+
 export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnalysis, onBack, onStartOver }) => {
   const [resumes, setResumes] = useState<ScreenedResume[]>([]);
   const [isScreening, setIsScreening] = useState(false);
@@ -174,6 +180,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('matchScore')}>
                                 Match Score <SortIcon direction={sortConfig.key === 'matchScore' ? sortConfig.direction : undefined} />
                             </th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matching Skills</th>
                             <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recommendation</th>
                             <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
@@ -201,6 +208,17 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
                                         </div>
                                     ) : (
                                         <div className="h-2.5 bg-gray-200 rounded-full animate-pulse"></div>
+                                    )}
+                                </td>
+                                <td className="px-6 py-4">
+                                    {resume.result && (
+                                        <div className="flex flex-wrap gap-1 max-w-sm">
+                                            {resume.result.matchingSkills.length > 0 ? (
+                                                resume.result.matchingSkills.map(skill => <SkillChip key={skill} skill={skill} />)
+                                            ) : (
+                                                <span className="text-xs text-gray-500">No specific matches</span>
+                                            )}
+                                        </div>
                                     )}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">

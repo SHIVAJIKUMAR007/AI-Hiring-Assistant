@@ -17,6 +17,7 @@ export interface ResumeScreeningResult {
   summary: string;
   strengths: string[];
   weaknesses: string[];
+  matchingSkills: string[];
   matchScore: number;
   recommendation: 'Strongly Recommend Interview' | 'Recommend Interview' | 'Consider with Reservations' | 'Not a good fit';
 }

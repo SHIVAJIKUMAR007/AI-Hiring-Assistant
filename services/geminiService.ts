@@ -74,6 +74,11 @@ const resumeScreeningSchema = {
             items: { type: Type.STRING },
             description: "A list of potential gaps or areas where the candidate lacks experience based on the requirements."
         },
+        matchingSkills: {
+            type: Type.ARRAY,
+            items: { type: Type.STRING },
+            description: "A list of skills from the resume that directly match the technical and soft skills required for the job."
+        },
         matchScore: {
             type: Type.NUMBER,
             description: "A score from 0 to 100 representing how well the resume matches the job description."
@@ -84,7 +89,7 @@ const resumeScreeningSchema = {
             description: "A final recommendation for the candidate."
         }
     },
-    required: ["summary", "strengths", "weaknesses", "matchScore", "recommendation"]
+    required: ["summary", "strengths", "weaknesses", "matchingSkills", "matchScore", "recommendation"]
 };
 
 export const analyzeRoleDescription = async (description: string): Promise<RoleAnalysis> => {
