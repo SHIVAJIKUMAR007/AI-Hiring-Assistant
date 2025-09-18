@@ -36,12 +36,12 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
           {steps.map((step) => (
             <li key={step.name} className="relative flex flex-col items-center justify-start text-center w-28">
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-full bg-white ${
+                className={`flex h-8 w-8 items-center justify-center rounded-full ${
                   step.id < currentStep
                     ? 'bg-primary-600'
                     : step.id === currentStep
-                    ? 'border-2 border-primary-600'
-                    : 'border-2 border-gray-300'
+                    ? 'bg-white border-2 border-primary-600'
+                    : 'bg-white border-2 border-gray-300'
                 }`}
               >
                 {step.id < currentStep ? (
