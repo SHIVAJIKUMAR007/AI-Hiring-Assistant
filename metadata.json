@@ -1,0 +1,5 @@
+{
+  "name": "Hiring Support Agent",
+  "description": "An AI agent that analyses role requirements, suggests interview questions, and screens resumes to streamline the hiring process.",
+  "requestFramePermissions": []
+}
