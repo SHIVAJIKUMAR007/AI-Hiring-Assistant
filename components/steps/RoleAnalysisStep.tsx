@@ -37,15 +37,14 @@ export const RoleAnalysisStep: React.FC<RoleAnalysisStepProps> = ({ onAnalysisCo
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Analyze Job Description</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Analyze Job Description</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Paste the full job description below. The AI will extract key responsibilities and skills.
         </p>
       </div>
       
       <TextArea
         value={description}
-        className="text-white"
         onChange={(e) => setDescription(e.target.value)}
         placeholder="e.g., Senior Frontend Engineer wanted for a fast-growing startup..."
         rows={12}

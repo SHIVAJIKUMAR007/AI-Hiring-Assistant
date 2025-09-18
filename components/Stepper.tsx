@@ -24,7 +24,7 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
       <div className="relative">
         {/* Progress Line */}
         <div className="absolute left-0 top-4 h-0.5 w-full" aria-hidden="true">
-          <div className="h-full w-full bg-gray-200" />
+          <div className="h-full w-full bg-gray-200 dark:bg-gray-700" />
           <div
             className="absolute left-0 top-0 h-full bg-primary-600 transition-all duration-300 ease-in-out"
             style={{ width: `${progressPercentage}%` }}
@@ -40,8 +40,8 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
                   step.id < currentStep
                     ? 'bg-primary-600'
                     : step.id === currentStep
-                    ? 'bg-white border-2 border-primary-600'
-                    : 'bg-white border-2 border-gray-300'
+                    ? 'bg-white dark:bg-gray-800 border-2 border-primary-600'
+                    : 'bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600'
                 }`}
               >
                 {step.id < currentStep ? (
@@ -50,7 +50,7 @@ export const Stepper: React.FC<StepperProps> = ({ steps, currentStep }) => {
                   <span className="h-2.5 w-2.5 rounded-full bg-primary-600" />
                 ) : null}
               </div>
-              <p className={`mt-3 text-sm font-medium ${step.id <= currentStep ? 'text-primary-700' : 'text-gray-500'}`}>
+              <p className={`mt-3 text-sm font-medium ${step.id <= currentStep ? 'text-primary-700 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'}`}>
                 {step.name}
               </p>
             </li>

@@ -43,8 +43,10 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFilesSelected }) => {
     fileInputRef.current?.click();
   };
 
-  const baseClasses = "relative block w-full rounded-lg border-2 border-dashed p-12 text-center transition-colors duration-200 ease-in-out";
-  const stateClasses = isDragOver ? "border-primary-500 bg-primary-50" : "border-gray-300 hover:border-gray-400";
+  const baseClasses = "relative block w-full rounded-lg border-2 border-dashed p-12 text-center transition-colors duration-200 ease-in-out cursor-pointer";
+  const stateClasses = isDragOver 
+    ? "border-primary-500 bg-primary-50 dark:bg-primary-900/10" 
+    : "border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500";
 
   return (
     <div
@@ -59,12 +61,12 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFilesSelected }) => {
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
       aria-label="File upload drop zone"
     >
-      <UploadIcon className="mx-auto h-12 w-12 text-gray-400" />
-      <span className="mt-2 block text-sm font-semibold text-gray-900">
+      <UploadIcon className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500" />
+      <span className="mt-2 block text-sm font-semibold text-gray-900 dark:text-gray-100">
         Drag and drop resumes here
       </span>
-      <span className="block text-sm text-gray-500">or click to browse</span>
-      <span className="mt-4 block text-xs text-gray-500">PDF files only</span>
+      <span className="block text-sm text-gray-500 dark:text-gray-400">or click to browse</span>
+      <span className="mt-4 block text-xs text-gray-500 dark:text-gray-400">PDF files only</span>
       <input
         ref={fileInputRef}
         type="file"

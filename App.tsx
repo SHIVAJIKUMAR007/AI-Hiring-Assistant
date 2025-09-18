@@ -6,8 +6,10 @@ import { RoleAnalysisStep } from './components/steps/RoleAnalysisStep';
 import { QuestionGeneratorStep } from './components/steps/QuestionGeneratorStep';
 import { ResumeScreenerStep } from './components/steps/ResumeScreenerStep';
 import { type RoleAnalysis, type InterviewQuestions } from './types';
+import { useTheme } from './contexts/ThemeContext';
 
 const App: React.FC = () => {
+  const { theme } = useTheme();
   const [currentStep, setCurrentStep] = useState(1);
   const [roleDescription, setRoleDescription] = useState<string>('');
   const [roleAnalysis, setRoleAnalysis] = useState<RoleAnalysis | null>(null);
@@ -44,33 +46,35 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans text-gray-800">
-      <Header />
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <Stepper steps={steps} currentStep={currentStep} />
-        <div className="mt-8 bg-white p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200">
-          {currentStep === 1 && (
-            <RoleAnalysisStep onAnalysisComplete={handleAnalysisComplete} initialDescription={roleDescription} />
-          )}
-          {currentStep === 2 && roleAnalysis && (
-            <QuestionGeneratorStep 
-              roleAnalysis={roleAnalysis} 
-              onQuestionsGenerated={handleQuestionsGenerated}
-              onBack={handleBack}
-            />
-          )}
-          {currentStep === 3 && roleAnalysis && interviewQuestions && (
-            <ResumeScreenerStep 
-              roleAnalysis={roleAnalysis} 
-              onBack={handleBack}
-              onStartOver={handleStartOver}
-            />
-          )}
-        </div>
-      </main>
-      <footer className="text-center py-4 text-gray-500 text-sm">
-        <p>AI Hiring Support Agent</p>
-      </footer>
+    <div className={`${theme} min-h-screen font-sans`}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+        <Header />
+        <main className="container mx-auto px-4 py-8 max-w-5xl">
+          <Stepper steps={steps} currentStep={currentStep} />
+          <div className="mt-8 bg-white dark:bg-gray-800/50 p-6 sm:p-8 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
+            {currentStep === 1 && (
+              <RoleAnalysisStep onAnalysisComplete={handleAnalysisComplete} initialDescription={roleDescription} />
+            )}
+            {currentStep === 2 && roleAnalysis && (
+              <QuestionGeneratorStep 
+                roleAnalysis={roleAnalysis} 
+                onQuestionsGenerated={handleQuestionsGenerated}
+                onBack={handleBack}
+              />
+            )}
+            {currentStep === 3 && roleAnalysis && interviewQuestions && (
+              <ResumeScreenerStep 
+                roleAnalysis={roleAnalysis} 
+                onBack={handleBack}
+                onStartOver={handleStartOver}
+              />
+            )}
+          </div>
+        </main>
+        <footer className="text-center py-4 text-gray-500 dark:text-gray-400 text-sm">
+          <p>AI Hiring Support Agent</p>
+        </footer>
+      </div>
     </div>
   );
 };

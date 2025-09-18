@@ -16,22 +16,22 @@ interface ResumeScreenerStepProps {
 
 const getRecommendationClasses = (recommendation: ResumeScreeningResult['recommendation']) => {
     switch (recommendation) {
-        case 'Strongly Recommend Interview': return 'bg-green-100 text-green-800';
-        case 'Recommend Interview': return 'bg-blue-100 text-blue-800';
-        case 'Consider with Reservations': return 'bg-yellow-100 text-yellow-800';
-        case 'Not a good fit': return 'bg-red-100 text-red-800';
-        default: return 'bg-gray-100 text-gray-800';
+        case 'Strongly Recommend Interview': return 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300';
+        case 'Recommend Interview': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300';
+        case 'Consider with Reservations': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300';
+        case 'Not a good fit': return 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300';
+        default: return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
 }
 
 const SortIcon: React.FC<{ direction?: 'ascending' | 'descending' }> = ({ direction }) => {
-    if (!direction) return <svg className="w-4 h-4 inline-block ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>;
+    if (!direction) return <svg className="w-4 h-4 inline-block ml-1 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9l4-4 4 4m0 6l-4 4-4-4" /></svg>;
     if (direction === 'ascending') return <svg className="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>;
     return <svg className="w-4 h-4 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>;
 };
 
 const SkillChip: React.FC<{ skill: string }> = ({ skill }) => (
-    <span className="inline-block bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded-full">
+    <span className="inline-block bg-blue-100 dark:bg-blue-900/70 text-blue-800 dark:text-blue-300 text-xs font-medium px-2 py-0.5 rounded-full">
         {skill}
     </span>
 );
@@ -143,8 +143,8 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="text-2xl font-bold text-gray-900">Resume Screener</h2>
-        <p className="mt-1 text-sm text-gray-600">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Resume Screener</h2>
+        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
           Upload candidate resumes in PDF format to screen them against the job requirements.
         </p>
       </div>
@@ -163,7 +163,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
       ) : (
         <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-2 justify-between items-center">
-                <p className="text-sm text-gray-600">{resumes.length} resume(s) uploaded.</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">{resumes.length} resume(s) uploaded.</p>
                 <div className="flex gap-2 flex-wrap justify-end">
                     <Button onClick={handleAddMoreClick} variant='secondary'>Add Resumes</Button>
                     <Button onClick={handleClear} variant='secondary'>Clear All</Button>
@@ -172,25 +172,25 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
                     </Button>
                 </div>
             </div>
-            <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+            <div className="overflow-x-auto border border-gray-200 dark:border-gray-700 rounded-lg">
+                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead className="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Candidate</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('matchScore')}>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Candidate</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer" onClick={() => requestSort('matchScore')}>
                                 Match Score <SortIcon direction={sortConfig.key === 'matchScore' ? sortConfig.direction : undefined} />
                             </th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matching Skills</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recommendation</th>
-                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Matching Skills</th>
+                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Recommendation</th>
+                            <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                        {sortedResumes.map(resume => (
-                            <tr key={resume.id}>
+                    <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                        {sortedResumes.map((resume, index) => (
+                            <tr key={resume.id} className={index % 2 === 0 ? 'bg-white dark:bg-gray-800/50' : 'bg-gray-50/50 dark:bg-gray-800/20'}>
                                 <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="text-sm font-medium text-gray-900 truncate max-w-xs">{resume.file.name}</div>
-                                    <div className="text-xs text-gray-500">
+                                    <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate sm:max-w-sm md:max-w-md">{resume.file.name}</div>
+                                    <div className="text-xs text-gray-500 dark:text-gray-400">
                                         {resume.status === 'parsing' && 'Parsing...'}
                                         {resume.status === 'ready' && 'Ready to screen'}
                                         {resume.status === 'screening' && 'Screening...'}
@@ -200,14 +200,14 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     {resume.result ? (
-                                        <div className="flex items-center gap-2">
-                                            <span className="font-bold text-primary-700 w-10">{resume.result.matchScore}%</span>
-                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                        <div className="flex items-center gap-3">
+                                            <span className="font-bold text-primary-700 dark:text-primary-400 w-10">{resume.result.matchScore}%</span>
+                                            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                                                 <div className="bg-primary-600 h-2.5 rounded-full" style={{ width: `${resume.result.matchScore}%` }}></div>
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="h-2.5 bg-gray-200 rounded-full animate-pulse"></div>
+                                        <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
                                     )}
                                 </td>
                                 <td className="px-6 py-4">
@@ -216,7 +216,7 @@ export const ResumeScreenerStep: React.FC<ResumeScreenerStepProps> = ({ roleAnal
                                             {resume.result.matchingSkills.length > 0 ? (
                                                 resume.result.matchingSkills.map(skill => <SkillChip key={skill} skill={skill} />)
                                             ) : (
-                                                <span className="text-xs text-gray-500">No specific matches</span>
+                                                <span className="text-xs text-gray-500 dark:text-gray-400">No specific matches</span>
                                             )}
                                         </div>
                                     )}
